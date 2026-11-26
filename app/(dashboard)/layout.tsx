@@ -728,7 +728,7 @@ export default function DashboardLayout({
             <p className="mt-1 text-muted-foreground">
               {user.plan === "premium"
                 ? "Your plan status is synced from the verified Market payment record."
-                : "You will be redirected to the SellersLogin Market receipt and Razorpay checkout."}
+                : "You will be redirected to the SellersLogin receipt and Razorpay checkout."}
             </p>
           </div>
           <DialogFooter>

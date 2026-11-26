@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authorizedBackendFetch } from "@/lib/backend";
+import { checkoutUrl, dashboardUrl } from "@/lib/checkout-url";
 
 export async function POST() {
   const meResponse = await authorizedBackendFetch("/auth/me");
@@ -14,8 +15,13 @@ export async function POST() {
   if (body.data?.status === "paid") return NextResponse.json({ success: true, data: { status: "paid" } });
   const payment = body.data?.payment;
   if (!payment?.applicationId || !payment?.accessToken) return NextResponse.json({ success: false, error: { message: "No active payment receipt is available" } }, { status: 409 });
-  const marketUrl = (process.env.MARKET_PUBLIC_URL || "http://localhost:3000").replace(/\/$/, "");
-  const dashboardUrl = (process.env.CIS_DASHBOARD_URL || "http://localhost:3002").replace(/\/$/, "");
-  const query = new URLSearchParams({ form, id: payment.applicationId, token: payment.accessToken, return_url: `${dashboardUrl}/dashboard?payment=verified` });
-  return NextResponse.json({ success: true, data: { status: "pending_payment", paymentUrl: `${marketUrl}/payments?${query}` } });
+  const paymentUrl = checkoutUrl({
+    form,
+    id: payment.applicationId,
+    token: payment.accessToken,
+    return_url: dashboardUrl("/dashboard?payment=verified"),
+  });
+  return NextResponse.json({ success: true, data: { status: "pending_payment", paymentUrl } }, {
+    headers: { "Cache-Control": "no-store" },
+  });
 }
